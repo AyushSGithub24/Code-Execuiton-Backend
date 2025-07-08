@@ -2,7 +2,53 @@
 
 A lightweight, secure, and efficient code execution engine designed to run user-submitted code inside isolated Docker containers. Perfect for online judges, code battles, and learning platforms.
 
+
 ---
+
+## 📐 Architecture Overview
+
+```text
+                   ┌────────────────────────┐
+                   │      Frontend UI       │
+                   │  (Code Battle App)     │
+                   └──────────┬─────────────┘
+                              │
+                              ▼
+                   ┌────────────────────────┐
+                   │   Backend API Server   │
+                   │  (Handles Submission)  │
+                   └──────────┬─────────────┘
+                              │ Push JSON job
+                              ▼
+                     ┌────────────────┐
+                     │  Redis Queue   │ ◄────── Push job to `submit`
+                     └────────────────┘
+                              │
+                              ▼
+       ┌──────────────────────────────────────────┐
+       │    Code Execution Service (Worker)       │
+       │  ▸ Reads from Redis `submit` queue        │
+       │  ▸ Extracts code, input, language, etc.   │
+       │  ▸ Creates files inside /submissions      │
+       │  ▸ Calls Docker container to execute code │
+       │  ▸ Compares output with test cases        │
+       │  ▸ Pushes result to `result` queue        │
+       └──────────────────────────────────────────┘
+                              │
+                              ▼
+                     ┌────────────────┐
+                     │  Redis Queue   │
+                     │   `result`     │
+                     └────────────────┘
+                              │
+                              ▼
+                   ┌────────────────────────┐
+                   │     Leaderboard /      │
+                   │     Result Display     │
+                   └────────────────────────┘
+
+---
+```
 
 ## 📂 Folder Structure
 
